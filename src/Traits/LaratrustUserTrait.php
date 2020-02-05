@@ -9,12 +9,12 @@ namespace Laratrust\Traits;
  * @license MIT
  * @package Laratrust
  */
-use Laratrust\Helper;
+
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Config;
 use Laratrust\Checkers\LaratrustCheckerManager;
+use Laratrust\Helper;
 
 trait LaratrustUserTrait
 {
@@ -601,7 +601,7 @@ trait LaratrustUserTrait
             return $role->permissions;
         });
 
-        return $this->permissions()->get()->merge($roles)->unique('name');
+        return $this->permissions()->get()->merge($roles)->unique->getKeyAttributeValue();
     }
 
     /**

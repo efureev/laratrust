@@ -11,6 +11,19 @@ namespace Laratrust\Contracts;
  */
 interface LaratrustPermissionInterface
 {
+    /**
+     * Key-column's name
+     *
+     * @return string
+     */
+    public static function getKeyAttributeName(): string;
+
+    /**
+     * Key-column's value
+     *
+     * @return mixed
+     */
+    public function getKeyAttributeValue();
 
     /**
      * Many-to-Many relations with role model.

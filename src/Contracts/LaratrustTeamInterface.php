@@ -12,6 +12,13 @@ namespace Laratrust\Contracts;
 interface LaratrustTeamInterface
 {
     /**
+     * Key-column's name
+     *
+     * @return string
+     */
+    public static function getKeyAttributeName(): string;
+
+    /**
      * Morph by Many relationship between the role and the one of the possible user models.
      *
      * @param  string $relationship

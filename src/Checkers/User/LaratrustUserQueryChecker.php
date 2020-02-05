@@ -16,18 +16,18 @@ class LaratrustUserQueryChecker extends LaratrustUserChecker
     public function getCurrentUserRoles($team = null)
     {
         if (config('laratrust.use_teams') === false) {
-            return $this->user->roles->pluck('name')->toArray();
+            return $this->user->roles->pluck(Helper::getRoleKeyAttributeName())->toArray();
         }
 
         if ($team === null && config('laratrust.teams_strict_check') === false) {
-            return $this->user->roles->pluck('name')->toArray();
+            return $this->user->roles->pluck(Helper::getRoleKeyAttributeName())->toArray();
         }
 
         if ($team === null) {
             return $this->user
                 ->roles()
                 ->wherePivot(config('laratrust.foreign_keys.team'), null)
-                ->pluck('name')
+                ->pluck(Helper::getRoleKeyAttributeName())
                 ->toArray();
         }
 
@@ -36,7 +36,7 @@ class LaratrustUserQueryChecker extends LaratrustUserChecker
         return $this->user
             ->roles()
             ->wherePivot(config('laratrust.foreign_keys.team'), $teamId)
-            ->pluck('name')
+            ->pluck(Helper::getRoleKeyAttributeName())
             ->toArray();
     }
 
@@ -61,8 +61,8 @@ class LaratrustUserQueryChecker extends LaratrustUserChecker
         $teamStrictCheck = Config::get('laratrust.teams_strict_check');
 
         $rolesCount = $this->user->roles()
-            ->whereIn('name', $rolesNames)
-            ->when($useTeams && ($teamStrictCheck || !is_null($team)), function ($query) use ($team) {
+            ->whereIn(Helper::getRoleKeyAttributeName(), $rolesNames)
+            ->when($useTeams && ($teamStrictCheck || $team !== null), function ($query) use ($team) {
                 $teamId = Helper::fetchTeam($team);
 
                 return $query->where(Config::get('laratrust.foreign_keys.team'), $teamId);
@@ -92,19 +92,21 @@ class LaratrustUserQueryChecker extends LaratrustUserChecker
         $useTeams = Config::get('laratrust.use_teams');
         $teamStrictCheck = Config::get('laratrust.teams_strict_check');
 
+        $permAttrName = Helper::getPermissionKeyAttributeName();
+
         list($permissionsWildcard, $permissionsNoWildcard) =
             Helper::getPermissionWithAndWithoutWildcards($permissionsNames);
 
         $rolesPermissionsCount = $this->user->roles()
             ->withCount(['permissions' =>
-                function ($query) use ($permissionsNoWildcard, $permissionsWildcard) {
-                    $query->whereIn('name', $permissionsNoWildcard);
+                function ($query) use ($permissionsNoWildcard, $permissionsWildcard, $permAttrName) {
+                    $query->whereIn($permAttrName, $permissionsNoWildcard);
                     foreach ($permissionsWildcard as $permission) {
-                        $query->orWhere('name', 'like', $permission);
+                        $query->orWhere($permAttrName, 'like', $permission);
                     }
                 }
             ])
-            ->when($useTeams && ($teamStrictCheck || !is_null($team)), function ($query) use ($team) {
+            ->when($useTeams && ($teamStrictCheck || $team !== null), function ($query) use ($team) {
                 $teamId = Helper::fetchTeam($team);
 
                 return $query->where(Config::get('laratrust.foreign_keys.team'), $teamId);
@@ -113,15 +115,15 @@ class LaratrustUserQueryChecker extends LaratrustUserChecker
             ->sum();
 
         $directPermissionsCount = $this->user->permissions()
-            ->whereIn('name', $permissionsNoWildcard)
-            ->when($permissionsWildcard, function ($query) use ($permissionsWildcard) {
+            ->whereIn($permAttrName, $permissionsNoWildcard)
+            ->when($permissionsWildcard, function ($query) use ($permissionsWildcard, $permAttrName) {
                 foreach ($permissionsWildcard as $permission) {
-                    $query->orWhere('name', 'like', $permission);
+                    $query->orWhere($permAttrName, 'like', $permission);
                 }
 
                 return $query;
             })
-            ->when($useTeams && ($teamStrictCheck || !is_null($team)), function ($query) use ($team) {
+            ->when($useTeams && ($teamStrictCheck || $team !== null), function ($query) use ($team) {
                 $teamId = Helper::fetchTeam($team);
 
                 return $query->where(Config::get('laratrust.foreign_keys.team'), $teamId);

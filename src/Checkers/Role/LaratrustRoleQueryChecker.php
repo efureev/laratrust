@@ -26,11 +26,15 @@ class LaratrustRoleQueryChecker extends LaratrustRoleChecker
         list($permissionsWildcard, $permissionsNoWildcard) =
             Helper::getPermissionWithAndWithoutWildcards($permissionsNames);
 
+        $attrName = Helper::getPermissionKeyAttributeName();
+        Helper::getPermissionKeyAttributeName();
+        Helper::getPermissionKeyAttributeName();
+        Helper::getPermissionKeyAttributeName();
         $permissionsCount = $this->role->permissions()
-            ->whereIn('name', $permissionsNoWildcard)
-            ->when($permissionsWildcard, function ($query) use ($permissionsWildcard) {
+            ->whereIn($attrName, $permissionsNoWildcard)
+            ->when($permissionsWildcard, static function ($query) use ($attrName,$permissionsWildcard) {
                 foreach ($permissionsWildcard as $permission) {
-                    $query->orWhere('name', 'like', $permission);
+                    $query->orWhere($attrName, 'like', $permission);
                 }
 
                 return $query;

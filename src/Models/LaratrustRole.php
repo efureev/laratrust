@@ -11,12 +11,14 @@ namespace Laratrust\Models;
  */
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
+use Laratrust\Traits\LaratrustKeyable;
 use Laratrust\Traits\LaratrustRoleTrait;
 use Laratrust\Contracts\LaratrustRoleInterface;
 
 class LaratrustRole extends Model implements LaratrustRoleInterface
 {
     use LaratrustRoleTrait;
+    use LaratrustKeyable;
 
     /**
      * The database table used by the model.

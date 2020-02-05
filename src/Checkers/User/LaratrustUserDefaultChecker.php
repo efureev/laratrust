@@ -2,6 +2,7 @@
 
 namespace Laratrust\Checkers\User;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Laratrust\Helper;
 use Illuminate\Support\Facades\Cache;
@@ -17,27 +18,28 @@ class LaratrustUserDefaultChecker extends LaratrustUserChecker
      */
     public function getCurrentUserRoles($team = null)
     {
+        /** @var Collection $roles */
         $roles = collect($this->userCachedRoles());
 
         if (config('laratrust.use_teams') === false) {
-            return $roles->pluck('name')->toArray();
+            return $roles->pluck->getKeyAttributeValue()->toArray();
         }
 
         if ($team === null && config('laratrust.teams_strict_check') === false) {
-            return $roles->pluck('name')->toArray();
+            return $roles->pluck(Helper::getRoleKeyAttributeName())->toArray();
         }
 
         if ($team === null) {
             return $roles->filter(function ($role) {
                 return $role['pivot'][config('laratrust.foreign_keys.team')] === null;
-            })->pluck('name')->toArray();
+            })->pluck(Helper::getRoleKeyAttributeName())->toArray();
         }
 
         $teamId = Helper::fetchTeam($team);
 
         return $roles->filter(function ($role) use ($teamId) {
             return $role['pivot'][config('laratrust.foreign_keys.team')] == $teamId;
-        })->pluck('name')->toArray();
+        })->pluck(Helper::getRoleKeyAttributeName())->toArray();
     }
 
     /**
@@ -51,7 +53,7 @@ class LaratrustUserDefaultChecker extends LaratrustUserChecker
     public function currentUserHasRole($name, $team = null, $requireAll = false)
     {
         $name = Helper::standardize($name);
-        list($team, $requireAll) = Helper::assignRealValuesTo($team, $requireAll, 'is_bool');
+        [$team, $requireAll] = Helper::assignRealValuesTo($team, $requireAll, 'is_bool');
 
         if (is_array($name)) {
             if (empty($name)) {
@@ -75,9 +77,9 @@ class LaratrustUserDefaultChecker extends LaratrustUserChecker
         }
 
         $team = Helper::fetchTeam($team);
-
+        $attrName = Helper::getRoleKeyAttributeName();
         foreach ($this->userCachedRoles() as $role) {
-            if ($role['name'] == $name && Helper::isInSameTeam($role, $team)) {
+            if ($role[$attrName] === $name && Helper::isInSameTeam($role, $team)) {
                 return true;
             }
         }
@@ -96,7 +98,7 @@ class LaratrustUserDefaultChecker extends LaratrustUserChecker
     public function currentUserHasPermission($permission, $team = null, $requireAll = false)
     {
         $permission = Helper::standardize($permission);
-        list($team, $requireAll) = Helper::assignRealValuesTo($team, $requireAll, 'is_bool');
+        [$team, $requireAll] = Helper::assignRealValuesTo($team, $requireAll, 'is_bool');
 
         if (is_array($permission)) {
             if (empty($permission)) {
@@ -108,7 +110,8 @@ class LaratrustUserDefaultChecker extends LaratrustUserChecker
 
                 if ($hasPermission && !$requireAll) {
                     return true;
-                } elseif (!$hasPermission && $requireAll) {
+                }
+                if (!$hasPermission && $requireAll) {
                     return false;
                 }
             }
@@ -120,9 +123,10 @@ class LaratrustUserDefaultChecker extends LaratrustUserChecker
         }
 
         $team = Helper::fetchTeam($team);
+        $attrName = Helper::getPermissionKeyAttributeName();
 
         foreach ($this->userCachedPermissions() as $perm) {
-            if (Helper::isInSameTeam($perm, $team) && Str::is($permission, $perm['name'])) {
+            if (Helper::isInSameTeam($perm, $team) && Str::is($permission, $perm[$attrName])) {
                 return true;
             }
         }

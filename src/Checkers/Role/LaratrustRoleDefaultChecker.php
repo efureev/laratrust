@@ -5,6 +5,8 @@ namespace Laratrust\Checkers\Role;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Laratrust\Contracts\LaratrustPermissionInterface;
+use Laratrust\Helper;
 
 class LaratrustRoleDefaultChecker extends LaratrustRoleChecker
 {
@@ -38,8 +40,9 @@ class LaratrustRoleDefaultChecker extends LaratrustRoleChecker
             return $requireAll;
         }
 
+        /** @var LaratrustPermissionInterface $perm */
         foreach ($this->currentRoleCachedPermissions() as $perm) {
-            if (Str::is($permission, $perm['name'])) {
+            if (Str::is($permission, $perm[Helper::getPermissionKeyAttributeName()])) {
                 return true;
             }
         }

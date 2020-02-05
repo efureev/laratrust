@@ -2,10 +2,10 @@
 
 namespace Laratrust;
 
-use InvalidArgumentException;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use Illuminate\Support\Facades\Config;
+use InvalidArgumentException;
 
 class Helper
 {
@@ -18,18 +18,23 @@ class Helper
      */
     public static function getIdFor($object, $type)
     {
-        if (is_null($object)) {
+        if ($object===null) {
             return null;
-        } elseif (is_object($object)) {
+        }
+        if (is_object($object)) {
             return $object->getKey();
-        } elseif (is_array($object)) {
+        }
+        if (is_array($object)) {
             return $object['id'];
-        } elseif (is_numeric($object)) {
+        }
+        if (is_numeric($object)) {
             return $object;
-        } elseif (is_string($object)) {
+        }
+        if (is_string($object)) {
+            $cls = Config::get("laratrust.models.{$type}");
             return call_user_func_array([
-                Config::get("laratrust.models.{$type}"), 'where'
-            ], ['name', $object])->firstOrFail()->getKey();
+                $cls, 'where'
+            ], [$cls::getKeyAttributeName(), $object])->firstOrFail()->getKey();
         }
 
         throw new InvalidArgumentException(
@@ -169,7 +174,7 @@ class Helper
         $model = new $class;
         $primaryKey = $model->getKeyName();
 
-        $model->setAttribute($primaryKey, $data[$primaryKey])->setAttribute('name', $data['name']);
+        $model->setAttribute($primaryKey, $data[$primaryKey])->setAttribute($class::getKeyAttributeName(), $data[$class::getKeyAttributeName()]);
         $model->setRelation(
             'pivot',
             MorphPivot::fromRawAttributes($model, $data['pivot'], 'pivot_table')
@@ -200,4 +205,25 @@ class Helper
 
         return [$wildcard, $noWildcard];
     }
+
+    public static function getPermissionKeyAttributeName()
+    {
+        static $permissionKeyAttributeName;
+        if ($permissionKeyAttributeName === null) {
+            $permissionKeyAttributeName = Config::get('laratrust.models.permission')::getKeyAttributeName();
+        }
+
+        return $permissionKeyAttributeName;
+    }
+
+    public static function getRoleKeyAttributeName()
+    {
+        static $roleKeyAttributeName;
+        if ($roleKeyAttributeName === null) {
+            $roleKeyAttributeName = Config::get('laratrust.models.role')::getKeyAttributeName();
+        }
+
+        return $roleKeyAttributeName;
+    }
+
 }

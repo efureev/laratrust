@@ -11,12 +11,14 @@ namespace Laratrust\Models;
  */
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
+use Laratrust\Traits\LaratrustKeyable;
 use Laratrust\Traits\LaratrustPermissionTrait;
 use Laratrust\Contracts\LaratrustPermissionInterface;
 
 class LaratrustPermission extends Model implements LaratrustPermissionInterface
 {
     use LaratrustPermissionTrait;
+    use LaratrustKeyable;
 
     /**
      * The database table used by the model.

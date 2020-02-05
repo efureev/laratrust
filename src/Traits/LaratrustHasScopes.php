@@ -17,11 +17,11 @@ trait LaratrustHasScopes
      */
     public function scopeWhereRoleIs($query, $role = '', $team = null, $boolean = 'and')
     {
-        $method = $boolean == 'and' ? 'whereHas' : 'orWhereHas';
+        $method = $boolean === 'and' ? 'whereHas' : 'orWhereHas';
 
         return $query->$method('roles', function ($roleQuery) use ($role, $team) {
             $teamsStrictCheck = Config::get('laratrust.teams_strict_check');
-            $roleQuery->where('name', $role)
+            $roleQuery->where(Helper::getRoleKeyAttributeName(), $role)
                 ->when($team || $teamsStrictCheck, function ($query) use ($team) {
                     $team = Helper::getIdFor($team, 'team');
                     return $query->where(Helper::teamForeignKey(), $team);
@@ -49,13 +49,13 @@ trait LaratrustHasScopes
      */
     public function scopeWherePermissionIs($query, $permission = '', $boolean = 'and')
     {
-        $method = $boolean == 'and' ? 'where' : 'orWhere';
-
-        return $query->$method(function ($query) use ($permission) {
-            $query->whereHas('roles.permissions', function ($permissionQuery) use ($permission) {
-                $permissionQuery->where('name', $permission);
-            })->orWhereHas('permissions', function ($permissionQuery) use ($permission) {
-                $permissionQuery->where('name', $permission);
+        $method = $boolean === 'and' ? 'where' : 'orWhere';
+        $attrName = Helper::getPermissionKeyAttributeName();
+        return $query->$method(function ($query) use ($attrName, $permission) {
+            $query->whereHas('roles.permissions', static function ($permissionQuery) use ($attrName, $permission) {
+                $permissionQuery->where($attrName, $permission);
+            })->orWhereHas('permissions', static function ($permissionQuery) use ($attrName, $permission) {
+                $permissionQuery->where($attrName, $permission);
             });
         });
     }

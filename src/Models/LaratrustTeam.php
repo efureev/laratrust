@@ -11,12 +11,14 @@ namespace Laratrust\Models;
  */
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model;
+use Laratrust\Traits\LaratrustKeyable;
 use Laratrust\Traits\LaratrustTeamTrait;
 use Laratrust\Contracts\LaratrustTeamInterface;
 
 class LaratrustTeam extends Model implements LaratrustTeamInterface
 {
     use LaratrustTeamTrait;
+    use LaratrustKeyable;
 
     /**
      * The database table used by the model.
