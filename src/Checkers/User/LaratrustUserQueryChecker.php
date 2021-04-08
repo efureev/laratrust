@@ -48,7 +48,7 @@ class LaratrustUserQueryChecker extends LaratrustUserChecker
      * @param  bool          $requireAll All roles in the array are required.
      * @return bool
      */
-    public function currentUserHasRole($name, $team = null, $requireAll = false)
+    public function currentUserHasRole($name, $teams = null, $requireAll = false)
     {
         if (empty($name)) {
             return true;
@@ -56,16 +56,16 @@ class LaratrustUserQueryChecker extends LaratrustUserChecker
 
         $name = Helper::standardize($name);
         $rolesNames = is_array($name) ? $name : [$name];
-        list($team, $requireAll) = Helper::assignRealValuesTo($team, $requireAll, 'is_bool');
+        [$teams, $requireAll] = Helper::assignRealValuesTo($teams, $requireAll, 'is_bool');
         $useTeams = Config::get('laratrust.use_teams');
         $teamStrictCheck = Config::get('laratrust.teams_strict_check');
 
         $rolesCount = $this->user->roles()
             ->whereIn(Helper::getRoleKeyAttributeName(), $rolesNames)
-            ->when($useTeams && ($teamStrictCheck || $team !== null), function ($query) use ($team) {
-                $teamId = Helper::fetchTeam($team);
+            ->when($useTeams && ($teamStrictCheck || ! empty($teams)), function ($query) use ($teams) {
+                $teamIds = Helper::fetchTeams($teams);
 
-                return $query->where(Config::get('laratrust.foreign_keys.team'), $teamId);
+                return $query->whereIn(Config::get('laratrust.foreign_keys.team'), $teamIds);
             })
             ->count();
 
@@ -80,7 +80,7 @@ class LaratrustUserQueryChecker extends LaratrustUserChecker
      * @param  bool  $requireAll All roles in the array are required.
      * @return bool
      */
-    public function currentUserHasPermission($permission, $team = null, $requireAll = false)
+    public function currentUserHasPermission($permission, $teams = null, $requireAll = false)
     {
         if (empty($permission)) {
             return true;
@@ -88,7 +88,7 @@ class LaratrustUserQueryChecker extends LaratrustUserChecker
 
         $permission = Helper::standardize($permission);
         $permissionsNames = is_array($permission) ? $permission : [$permission];
-        list($team, $requireAll) = Helper::assignRealValuesTo($team, $requireAll, 'is_bool');
+        [$teams, $requireAll] = Helper::assignRealValuesTo($teams, $requireAll, 'is_bool');
         $useTeams = Config::get('laratrust.use_teams');
         $teamStrictCheck = Config::get('laratrust.teams_strict_check');
 
@@ -106,10 +106,10 @@ class LaratrustUserQueryChecker extends LaratrustUserChecker
                     }
                 }
             ])
-            ->when($useTeams && ($teamStrictCheck || $team !== null), function ($query) use ($team) {
-                $teamId = Helper::fetchTeam($team);
+            ->when($useTeams && ($teamStrictCheck || ! empty($teams)), function ($query) use ($teams) {
+                $teamIds = Helper::fetchTeams($teams);
 
-                return $query->where(Config::get('laratrust.foreign_keys.team'), $teamId);
+                return $query->whereIn(Config::get('laratrust.foreign_keys.team'), $teamIds);
             })
             ->pluck('permissions_count')
             ->sum();
@@ -123,10 +123,10 @@ class LaratrustUserQueryChecker extends LaratrustUserChecker
 
                 return $query;
             })
-            ->when($useTeams && ($teamStrictCheck || $team !== null), function ($query) use ($team) {
-                $teamId = Helper::fetchTeam($team);
+            ->when($useTeams && ($teamStrictCheck || ! empty($teams)), function ($query) use ($teams) {
+                $teamIds = Helper::fetchTeams($teams);
 
-                return $query->where(Config::get('laratrust.foreign_keys.team'), $teamId);
+                return $query->whereIn(Config::get('laratrust.foreign_keys.team'), $teamIds);
             })
             ->count();
 
