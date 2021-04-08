@@ -83,9 +83,9 @@ class Helper
      * Fetch the team models from the name.
      *
      * @param  array  $team
-     * @return mixed
+     * @return array
      */
-    public static function fetchTeams($teams = [])
+    public static function fetchTeams($teams)
     {
         if (! is_array($teams) || ! $teams || !Config::get('laratrust.use_teams')) {
             return null;

@@ -46,7 +46,7 @@ class LaratrustUserDefaultChecker extends LaratrustUserChecker
      * Checks if the user has a role by its name.
      *
      * @param  string|array  $name       Role name or array of role names.
-     * @param  string|bool|array   $teams      Team name or requiredAll roles.
+     * @param  string|bool|array|null   $teams      Team name or requiredAll roles.
      * @param  bool          $requireAll All roles in the array are required.
      * @return bool
      */
@@ -90,9 +90,9 @@ class LaratrustUserDefaultChecker extends LaratrustUserChecker
     /**
      * Check if user has a permission by its name.
      *
-     * @param string|array      $permission Permission string or array of permissions.
-     * @param string|bool|array $team       Team name or requiredAll roles.
-     * @param bool              $requireAll All roles in the array are required.
+     * @param string|array           $permission Permission string or array of permissions.
+     * @param string|bool|array|null $team       Team name or requiredAll roles.
+     * @param bool                   $requireAll All roles in the array are required.
      *
      * @return bool
      */

@@ -62,7 +62,7 @@ class LaratrustUserQueryChecker extends LaratrustUserChecker
 
         $rolesCount = $this->user->roles()
             ->whereIn(Helper::getRoleKeyAttributeName(), $rolesNames)
-            ->when($useTeams && ($teamStrictCheck || ! $teams), function ($query) use ($teams) {
+            ->when($useTeams && ($teamStrictCheck || ! $teams || $teams !== '0'), function ($query) use ($teams) {
                 $teamIds = Helper::fetchTeams($teams);
 
                 return $query->whereIn(Config::get('laratrust.foreign_keys.team'), $teamIds);
