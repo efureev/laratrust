@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Support\Facades\Config;
 use InvalidArgumentException;
+use Sitesoft\Alice\Modules\News\Models\News;
 
 class Helper
 {
@@ -79,17 +80,32 @@ class Helper
     }
 
     /**
+     * Fetch the team models from the name.
+     *
+     * @param  array  $team
+     * @return mixed
+     */
+    public static function fetchTeams($teams = [])
+    {
+        if (! is_array($teams) || ! $teams || !Config::get('laratrust.use_teams')) {
+            return null;
+        }
+
+        return static::getIdsFor($teams, 'team');
+    }
+
+    /**
      * Assing the real values to the team and requireAllOrOptions parameters.
      *
-     * @param  mixed  $team
+     * @param  mixed|array  $teams
      * @param  mixed  $requireAllOrOptions
      * @return array
      */
-    public static function assignRealValuesTo($team, $requireAllOrOptions, $method)
+    public static function assignRealValuesTo($teams, $requireAllOrOptions, $method)
     {
         return [
-            ($method($team) ? null : $team),
-            ($method($team) ? $team : $requireAllOrOptions),
+            ($method($teams) ? null : $teams),
+            ($method($teams) ? $teams : $requireAllOrOptions),
         ];
     }
 
@@ -111,7 +127,7 @@ class Helper
      * Check if a role or permission is attach to the user in a same team.
      *
      * @param  mixed  $rolePermission
-     * @param  \Illuminate\Database\Eloquent\Model  $team
+     * @param  \Illuminate\Database\Eloquent\Model|array  $team
      * @return boolean
      */
     public static function isInSameTeam($rolePermission, $team)
@@ -125,7 +141,7 @@ class Helper
 
         $teamForeignKey = static::teamForeignKey();
 
-        return $rolePermission['pivot'][$teamForeignKey] == $team;
+        return in_array($rolePermission['pivot'][$teamForeignKey], (array) $team);
     }
 
     /**
@@ -224,5 +240,23 @@ class Helper
         }
 
         return $roleKeyAttributeName;
+    }
+
+    /**
+     * Gets the it from an array, object or integer.
+     *
+     * @param  array  $objects
+     * @param  string  $type
+     * @return array
+     */
+    public static function getIdsFor(array $objects, $type)
+    {
+        $result = [];
+
+        foreach ($objects as $object) {
+            $result[] = self::getIdFor($object, $type);
+        }
+
+        return $result;
     }
 }
