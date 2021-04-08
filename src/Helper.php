@@ -87,11 +87,7 @@ class Helper
      */
     public static function fetchTeams($teams)
     {
-        if (! $teams) {
-            return null;
-        }
-
-        return static::getIdsFor((array) $teams, 'team');
+        return $teams ? static::getIdsFor((array) $teams, 'team') : null;
     }
 
     /**
