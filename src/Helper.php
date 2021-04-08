@@ -87,11 +87,11 @@ class Helper
      */
     public static function fetchTeams($teams)
     {
-        if (! is_array($teams) || ! $teams || !Config::get('laratrust.use_teams')) {
+        if (! $teams || !Config::get('laratrust.use_teams')) {
             return null;
         }
 
-        return static::getIdsFor($teams, 'team');
+        return static::getIdsFor((array) $teams, 'team');
     }
 
     /**
