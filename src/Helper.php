@@ -87,7 +87,7 @@ class Helper
      */
     public static function fetchTeams($teams)
     {
-        if (! $teams || !Config::get('laratrust.use_teams')) {
+        if (! $teams) {
             return null;
         }
 
