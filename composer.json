@@ -21,14 +21,14 @@
     }
   ],
   "require": {
-    "php": "^7.3",
+    "php": "^7.4 | ^8.0",
     "kkszymanowski/traitor": "^0.2.5",
-    "laravel/framework": "~5.8.0|~6.0|~7.0"
+    "laravel/framework": "^7.30|^8.30"
   },
   "require-dev": {
-    "mockery/mockery": "~1.3",
-    "orchestra/testbench": "~4.6 | ~5.0",
-    "phpunit/phpunit": "~9.0"
+    "mockery/mockery": "^1.4",
+    "orchestra/testbench": "^5.18",
+    "phpunit/phpunit": "^9.5"
   },
   "autoload": {
     "psr-4": {
